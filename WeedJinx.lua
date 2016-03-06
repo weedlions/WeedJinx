@@ -9,13 +9,14 @@ local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
 local Version = 0.1
+local Heal, Barrier = nil
 
 if myHero.charName ~= "Jinx" then return end
-if not FileExist(LIB_PATH .. "/VPrediction.lua") then PrintChat("<font color=\"0B6121\"><b>--Weed Jinx--</b></font> ".."<font color=\"#FFFFFF\"><b>Missing lib: VPrediction.</b></font>") return end
+--if not FileExist(LIB_PATH .. "/VPrediction.lua") then PrintChat("<font color=\"0B6121\"><b>--Weed Jinx--</b></font> ".."<font color=\"#FFFFFF\"><b>Missing lib: VPrediction.</b></font>") return end
 
 function OnLoad()
 
-  minman = minionManager(MINION_ALL, 525)
+  minman = minionManager(MINION_ALL, 700)
 
   if(myHero.charName == "Jinx") then
     prntChat("Welcome to Weed Jinx. Good Luck, Have Fun!")
@@ -23,11 +24,25 @@ function OnLoad()
   end
 
   ts = TargetSelector(TARGET_LESS_CAST,1450)
-  ts2 = TargetSelector(TARGET_LESS_CAST,525)
+  ts2 = TargetSelector(TARGET_LESS_CAST,700)
 
-  initPreds()
   initMenu()
+  initSumms()
+
+  require "VPrediction"
+  currentPred = VPrediction()
+
   CheckUpdates()
+
+end
+
+function initSumms()
+
+  if myHero:GetSpellData(SUMMONER_1).name == "SummonerBarrier" then Barrier = 1
+  elseif myHero:GetSpellData(SUMMONER_1).name == "SummonerHeal" then Heal = 1 end
+
+  if myHero:GetSpellData(SUMMONER_2).name == "SummonerBarrier" then Barrier = 2
+  elseif myHero:GetSpellData(SUMMONER_2).name == "SummonerHeal" then Heal = 2 end
 
 end
 
@@ -36,13 +51,13 @@ function initMenu()
   Config = scriptConfig("Weed Jinx", "weedjnx")
 
   Config:addSubMenu("Combo Settings", "settComb")
-  Config.settComb:addParam("useq", "Use Q", SCRIPT_PARAM_ONOFF, true)
+  Config.settComb:addParam("useq", "Smart Q Usage", SCRIPT_PARAM_ONOFF, true)
   Config.settComb:addParam("usew", "Use W", SCRIPT_PARAM_ONOFF, true)
   Config.settComb:addParam("usewaa", "Use W Only if enemy not in AA Range", SCRIPT_PARAM_ONOFF, true)
   Config.settComb:addParam("usee", "Use E", SCRIPT_PARAM_ONOFF, true)
 
   Config:addSubMenu("Harass Settings", "settHar")
-  Config.settHar:addParam("useq", "Use Q", SCRIPT_PARAM_ONOFF, true)
+  Config.settHar:addParam("useq", "Smart Q Usage", SCRIPT_PARAM_ONOFF, true)
   Config.settHar:addParam("usew", "Use W", SCRIPT_PARAM_ONOFF, true)
   Config.settHar:addParam("usewaa", "Use W Only if enemy not in AA Range", SCRIPT_PARAM_ONOFF, true)
   Config.settHar:addParam("usee", "Use E", SCRIPT_PARAM_ONOFF, true)
@@ -65,12 +80,13 @@ function initMenu()
   Config.settDraw:addParam("wrange", "Draw W Range", SCRIPT_PARAM_ONOFF, true)
   Config.settDraw:addParam("erange", "Draw E Range", SCRIPT_PARAM_ONOFF, true)
 
-  Config:addSubMenu("Autopotion Settings", "settPot")
-  Config.settPot:addParam("active", "Use Autopotion", SCRIPT_PARAM_ONOFF, true)
+  Config:addSubMenu("Auto Potion Settings", "settPot")
+  Config.settPot:addParam("active", "Use Auto Potion", SCRIPT_PARAM_ONOFF, true)
   Config.settPot:addParam("hp", "Min % HP to Activate", SCRIPT_PARAM_SLICE, 60, 0, 100, 0)
 
-  Config:addSubMenu("Prediction Settings", "settPred")
-  Config.settPred:addParam("pred", "Select Prediction", SCRIPT_PARAM_LIST, 1, predTable)
+  Config:addSubMenu("Auto Heal/Auto Barrier Settings", "settAHeal")
+  Config.settAHeal:addParam("active", "Use Auto Heal/Barrier", SCRIPT_PARAM_ONOFF, true)
+  Config.settAHeal:addParam("hp", "Use on X % HP", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
 
   Config:addSubMenu("HitChance Settings", "settHit")
   Config.settHit:addParam("Blank", "HitChance for E", SCRIPT_PARAM_INFO, "")
@@ -92,60 +108,7 @@ function initMenu()
 
 end
 
-function initPreds()
-
-  if FileExist(LIB_PATH .. "VPrediction.lua") then
-    table.insert(predTable, "VPrediction")
-    loadedVP = false
-  end
-  --[[if FileExist(LIB_PATH .. "SPrediction.lua") then
-  table.insert(predTable, "SPrediction")
-  loadedSP = false
-  end
-  if FileExist(LIB_PATH .. "HPrediction.lua") then
-  table.insert(predTable, "HPrediction")
-  loadedHP = false
-  end
-  if FileExist(LIB_PATH .. "KPrediction.lua") then
-  table.insert(predTable, "KPrediction")
-  loadedKP = false
-  end
-  if FileExist(LIB_PATH .. "DivinePred.lua") then
-  table.insert(predTable, "DPrediction")
-  loadedDP = false
-  end]]--
-
-end
-
-function activePreds()
-
-  if predTable[Config.settPred.pred] == "SPrediction" and not loadedSP then
-    require "SPrediction"
-    loadedSP, currentPred = true, SPrediction()
-    loadedVP, loadedHP, loadedKP, loadedDP = false
-  elseif predTable[Config.settPred.pred] == "VPrediction" and not loadedVP then
-    require "VPrediction"
-    loadedVP, currentPred = true, VPrediction()
-    loadedKP, loadedHP, loadedSP, loadedDP = false
-  elseif predTable[Config.settPred.pred] == "HPrediction" and not loadedHP then
-    require "Hprediction"
-    loadedHP, currentPred = true, HPrediction()
-    W = HPSkillshot({type = "DelayLine", range = 1500, delay = 0.60, speed = 3300, width = 120 , collisionM = true, collisionH = true})
-    E = HPSkillshot({type = "DelayCircle", delay = 0.7, range = 900, width = 100, collisionM = false, collisionH = false})
-    loadedVP, loadedKP, loadedSP, loadedDP = false
-  elseif predTable[Config.settPred.pred] == "KPrediction" and not loadedKP then
-    require "Kprediction"
-    loadedKP, currentPred = true, KPrediction()
-    W = KPSkillshot({type = "DelayLine", delay = 0.75, range = 1440, width = 50, speed = 2000, collisionM = true, collisionH = true})
-    E = KPSkillshot({type = "DelayCircle", delay = 0.7, range = 900, width = 100, collisionM = false, collisionH = false})
-    loadedVP, loadedHP, loadedSP, loadedDP = false
-  end
-
-end
-
 function OnTick()
-
-  activePreds()
 
   if myHero.dead then return end
 
@@ -161,7 +124,6 @@ function OnTick()
 
   if(UOL:GetOrbWalkMode() == "Harass") then onHarass() end
 
-  --killSteal()
   getQStatus()
   qlvl = myHero:GetSpellData(_Q).level
   if Config.settPot then autoPotion() end
@@ -169,6 +131,24 @@ function OnTick()
   tsUpdate()
 
   onKillSteal()
+
+  if Config.settAHeal.active then autoHeal() end
+
+end
+
+function autoHeal()
+
+  if ((myHero.health/myHero.maxHealth)*100) < Config.settAHeal.hp then
+    if Barrier==1 and myHero:CanUseSpell(SUMMONER_1) then
+      CastSpell(SUMMONER_1)
+    elseif Heal==1 and myHero:CanUseSpell(SUMMONER_1) then
+      CastSpell(SUMMONER_1)
+    elseif Barrier==2 and myHero:CanUseSpell(SUMMONER_2) then
+      CastSpell(SUMMONER_2)
+    elseif Heal==2 and myHero:CanUseSpell(SUMMONER_2) then
+      CastSpell(SUMMONER_2)
+    end
+  end
 
 end
 
@@ -461,7 +441,7 @@ function GetWTarget()
   end
 end
 
-function GetVPred(target, spell)
+function predict(target, spell)
 
   if(spell == "W") then
     local CastPosition, HitChance, Position = currentPred:GetLineCastPosition(target, 0.75, 50, 1440, 2000, myHero, true)
@@ -479,68 +459,6 @@ function GetVPred(target, spell)
       return CastPosition
     end
   else return nil
-  end
-
-
-end
-
-function GetSPred(target, spell)
-
-  if(spell == "W") then
-    local CastPosition, HitChance, Position = currentPred:Predict(target, 1440, 2000, 0.75, 50, true, myHero)
-    if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < 1440 then
-      return CastPosition
-    end
-  elseif(spell == "E") then
-    local CastPosition, HitChance, Position = currentPred:Predict(target, 900, Math.huge, 0.7, 100, false, myHero)
-    if CastPosition and HitChance >= 4 and GetDistance(CastPosition) < 890 then
-      return CastPosition
-    end
-  else return nil
-  end
-
-end
-
-function GetHPred(target, spell)
-
-  if(spell == "W") then
-    local CastPosition, HitChance = currentPred:GetPredict(W, target, myHero)
-    if CastPosition and HitChance >= 1 and GetDistance(CastPosition) < 1440 then
-      return CastPosition
-    end
-  elseif(spell == "E") then
-    local CastPosition, HitChance = currentPred:GetPredict(E, target, myHero)
-    if CastPosition and HitChance >= 4 and GetDistance(CastPosition) < 890 then
-      return CastPosition
-    end
-  else return nil
-  end
-
-end
-
-function GetKPred(target, spell)
-
-  if(spell == "W") then
-    local CastPosition, HitChance = currentPred:GetPrediction(W, target, myHero)
-    if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < 1440 then
-      return CastPosition
-    end
-  elseif(spell == "E") then
-    local CastPosition, HitChance = currentPred:GetPrediction(E, target, myHero)
-    if CastPosition and HitChance >= 4 and GetDistance(CastPosition) < 890 then
-      return CastPosition
-    end
-  else return nil
-  end
-
-end
-
-function predict(target, spell)
-
-  if loadedSP then return GetSPred(target, spell)
-  elseif loadedVP then return GetVPred(target, spell)
-  elseif loadedHP then return GetHPred(target, spell)
-  elseif loadedKP then return GetKPred(target, spell)
   end
 
 end
@@ -584,37 +502,37 @@ end
 
 function prntChat(message)
 
-  PrintChat("<font color=\"#0B6121\"><b>--Weed Jinx--</b></font> ".."<font color=\"#FFFFFF\"><b>"..msg..".</b></font>")
+  PrintChat("<font color=\"#0B6121\"><b>--Weed Jinx--</b></font> ".."<font color=\"#FFFFFF\"><b>"..message..".</b></font>")
 
 end
 
 
 
 local serveradress = "raw.githubusercontent.com"
-local scriptadress = "/weedlions/Weed-Jinx/master"
+local scriptadress = "/weedlions/WeedJinx/master"
 local scriptname = "WeedJinx"
 local adressfull = "http://"..serveradress..scriptadress.."/"..scriptname..".lua"
 function CheckUpdates()
-    local ServerVersionDATA = GetWebResult(serveradress , scriptadress.."/"..scriptname..".version")
-    if ServerVersionDATA then
+  local ServerVersionDATA = GetWebResult(serveradress , scriptadress.."/"..scriptname..".version")
+  if ServerVersionDATA then
     local ServerVersion = tonumber(ServerVersionDATA)
     if ServerVersion then
-    if ServerVersion > tonumber(Version) then
-    prntChat("Updating, don't press F9")
-    DownloadUpdate()
+      if ServerVersion > tonumber(Version) then
+        prntChat("Updating, don't press F9")
+        DownloadUpdate()
+      else
+        prntChat("You have the latest version")
+      end
     else
-    prntChat("You have the latest version")
+      prntChat("An error occured, while updating")
     end
-    else
-    prntChat("An error occured, while updating")  
-    end
-    else
+  else
     prntChat("Could not connect to update Server")
-end
+  end
 end
 
-function DownloadUpdate()    
-    DownloadFile(adressfull, SCRIPT_PATH..scriptname..".lua", function ()
+function DownloadUpdate()
+  DownloadFile(adressfull, SCRIPT_PATH..scriptname..".lua", function ()
     prntChat("Updated, press 2x F9")
-    end)
+  end)
 end
