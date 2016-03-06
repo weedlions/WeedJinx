@@ -8,23 +8,23 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.2
+local Version = 0.3
 local Heal, Barrier = nil
 
 if myHero.charName ~= "Jinx" then return end
---if not FileExist(LIB_PATH .. "/VPrediction.lua") then PrintChat("<font color=\"0B6121\"><b>--Weed Jinx--</b></font> ".."<font color=\"#FFFFFF\"><b>Missing lib: VPrediction.</b></font>") return end
+if not FileExist(LIB_PATH .. "/VPrediction.lua") then PrintChat("<font color=\"0B6121\"><b>--Weed Jinx--</b></font> ".."<font color=\"#FFFFFF\"><b>Missing lib: VPrediction.</b></font>") return end
 
 function OnLoad()
 
-  minman = minionManager(MINION_ALL, 700)
+  minman = minionManager(MINION_ALL, 800)
 
   if(myHero.charName == "Jinx") then
     prntChat("Welcome to Weed Jinx. Good Luck, Have Fun!")
     prntChat("Version "..Version.." loaded.")
   end
 
-  ts = TargetSelector(TARGET_LESS_CAST,1450)
-  ts2 = TargetSelector(TARGET_LESS_CAST,700)
+  ts = TargetSelector(TARGET_LESS_CAST,1600)
+  ts2 = TargetSelector(TARGET_LESS_CAST,800)
 
   initMenu()
   initSumms()
@@ -96,7 +96,7 @@ function initMenu()
   Config.settHit:addParam("Blank", "HitChance for R", SCRIPT_PARAM_INFO, "")
   Config.settHit:addParam("rhit", "Recommended = 2", SCRIPT_PARAM_SLICE, 2, 2, 4, 0)
   Config.settHit:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
-  Config.settHit:addParam("Blank", "2 = Explanation", SCRIPT_PARAM_INFO, "")
+  Config.settHit:addParam("Blank", "Explanation", SCRIPT_PARAM_INFO, "")
   Config.settHit:addParam("Blank", "2 = High Hitchance", SCRIPT_PARAM_INFO, "")
   Config.settHit:addParam("Blank", "3 = Slowed Targets (~100%)", SCRIPT_PARAM_INFO, "")
   Config.settHit:addParam("Blank", "4 = Immobile Targets (~100%)", SCRIPT_PARAM_INFO, "")
@@ -180,28 +180,28 @@ end
 function tsUpdate()
 
   if qlvl == 0 and not q0 then
-    ts2 = TargetSelector(TARGET_LESS_CAST,525)
-    minman = minionManager(MINION_ALL, 525)
-    q0 = true
-  elseif qlvl == 1 and not q1 then
-    ts2 = TargetSelector(TARGET_LESS_CAST,600)
-    minman = minionManager(MINION_ALL, 600)
-    q1 = true
-  elseif qlvl == 2 and not q2 then
     ts2 = TargetSelector(TARGET_LESS_CAST,625)
     minman = minionManager(MINION_ALL, 625)
-    q2 = true
-  elseif qlvl == 3 and not q3 then
-    ts2 = TargetSelector(TARGET_LESS_CAST,650)
-    minman = minionManager(MINION_ALL, 650)
-    q3 = true
-  elseif qlvl == 4 and not q4 then
-    ts2 = TargetSelector(TARGET_LESS_CAST,675)
-    minman = minionManager(MINION_ALL, 675)
-    q4 = true
-  elseif qlvl == 5 and not q5 then
+    q0 = true
+  elseif qlvl == 1 and not q1 then
     ts2 = TargetSelector(TARGET_LESS_CAST,700)
     minman = minionManager(MINION_ALL, 700)
+    q1 = true
+  elseif qlvl == 2 and not q2 then
+    ts2 = TargetSelector(TARGET_LESS_CAST,725)
+    minman = minionManager(MINION_ALL, 725)
+    q2 = true
+  elseif qlvl == 3 and not q3 then
+    ts2 = TargetSelector(TARGET_LESS_CAST,750)
+    minman = minionManager(MINION_ALL, 750)
+    q3 = true
+  elseif qlvl == 4 and not q4 then
+    ts2 = TargetSelector(TARGET_LESS_CAST,775)
+    minman = minionManager(MINION_ALL, 775)
+    q4 = true
+  elseif qlvl == 5 and not q5 then
+    ts2 = TargetSelector(TARGET_LESS_CAST,800)
+    minman = minionManager(MINION_ALL, 800)
     q5 = true
   end
 
@@ -497,6 +497,8 @@ function OnDraw()
   if(Config.settDraw.erange) then
     DrawCircle(myHero.x, myHero.y, myHero.z, 900, 0x111111)
   end
+  
+  DrawTextA(qlvl,12,20,20*1+20)
 
 end
 
