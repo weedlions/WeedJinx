@@ -7,7 +7,7 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.902
+local Version = 0.903
 local Heal, Barrier = nil
 local OrbWalkers = {}
 local LoadedOrb = nil
@@ -124,9 +124,9 @@ function OnTick()
   ts2:update()
   minman:update()
 
-  if(getMode() == "LaneClear") then onLaneClear() end
+  if(getMode() == "Laneclear") then onLaneClear() end
 
-  if(getMode() == "LastHit") then onLastHit() end
+  if(getMode() == "Lasthit") then onLastHit() end
 
   if(getMode() == "Combo") then onCombo() end
 
@@ -310,6 +310,10 @@ function onHarass()
   if Config.settHar.usew and myHero:CanUseSpell(_W)then
     if Config.settHar.usewaa then
       if(qlvl == 0) then
+        if GetDistance(enemy.pos) > 525 then
+          local CastPosition = predict(enemy, "W")
+          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+        end
       elseif(qlvl == 1) then
         if GetDistance(enemy.pos) > 600 then
           local CastPosition = predict(enemy, "W")
@@ -440,7 +444,7 @@ function GetTarget()
   else
     return nil
   end
-  
+
 end
 
 function GetWTarget()
