@@ -11,10 +11,10 @@ local Version = 0.4
 local Heal, Barrier = nil
 
 if myHero.charName ~= "Jinx" then return end
-if not FileExist(SCRIPT_PATH.."VPrediction.lua") then prntChat("VPrediction not installed, installing now.") DownloadVPred()
+if not FileExist(LIB_PATH.."VPrediction.lua") then prntChat("VPrediction not installed, installing now.") DownloadVPred()
 else require "VPrediction" currentPred = VPrediction() end
 
-if not FileExist(SCRIPT_PATH.."UOL.lua") then prntChat("Unified Orbwalker Library not installed, installing now.") DownloadUOL()
+if not FileExist(LIB_PATH.."UOL.lua") then prntChat("Unified Orbwalker Library not installed, installing now.") DownloadUOL()
 else require "UOL" end
 
 function OnLoad()
@@ -104,7 +104,7 @@ function initMenu()
   Config:addSubMenu("Key Settings", "settKey")
   Config.settKey:addParam("Blank", "Use Orbwalker Keys", SCRIPT_PARAM_INFO, "")
 
-  UOL:AddToMenu(scriptConfig("OrbWalker", "OrbWalker"))
+  --UOL:AddToMenu(scriptConfig("OrbWalker", "OrbWalker"))
 
 end
 
