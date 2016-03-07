@@ -7,7 +7,7 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.901
+local Version = 0.902
 local Heal, Barrier = nil
 local OrbWalkers = {}
 local LoadedOrb = nil
@@ -188,28 +188,28 @@ end
 function tsUpdate()
 
   if qlvl == 0 and not q0 then
-    ts2 = TargetSelector(TARGET_LESS_CAST,625)
-    minman = minionManager(MINION_ALL, 625)
+    ts2 = TargetSelector(TARGET_LESS_CAST,525)
+    minman = minionManager(MINION_ALL, 525)
     q0 = true
   elseif qlvl == 1 and not q1 then
-    ts2 = TargetSelector(TARGET_LESS_CAST,700)
-    minman = minionManager(MINION_ALL, 700)
+    ts2 = TargetSelector(TARGET_LESS_CAST,600)
+    minman = minionManager(MINION_ALL, 600)
     q1 = true
   elseif qlvl == 2 and not q2 then
-    ts2 = TargetSelector(TARGET_LESS_CAST,725)
-    minman = minionManager(MINION_ALL, 725)
+    ts2 = TargetSelector(TARGET_LESS_CAST,625)
+    minman = minionManager(MINION_ALL, 625)
     q2 = true
   elseif qlvl == 3 and not q3 then
-    ts2 = TargetSelector(TARGET_LESS_CAST,750)
-    minman = minionManager(MINION_ALL, 750)
+    ts2 = TargetSelector(TARGET_LESS_CAST,650)
+    minman = minionManager(MINION_ALL, 650)
     q3 = true
   elseif qlvl == 4 and not q4 then
-    ts2 = TargetSelector(TARGET_LESS_CAST,775)
-    minman = minionManager(MINION_ALL, 775)
+    ts2 = TargetSelector(TARGET_LESS_CAST,675)
+    minman = minionManager(MINION_ALL, 675)
     q4 = true
   elseif qlvl == 5 and not q5 then
-    ts2 = TargetSelector(TARGET_LESS_CAST,800)
-    minman = minionManager(MINION_ALL, 800)
+    ts2 = TargetSelector(TARGET_LESS_CAST,700)
+    minman = minionManager(MINION_ALL, 700)
     q5 = true
   end
 
@@ -287,29 +287,25 @@ function onHarass()
 
   if enemy.team == myHero.team and not enemy.bTargetable and not enemy.visible and enemy.dead then return end
 
-  if Config.settHar.useq and myHero:CanUseSpell(_Q) then
+  if Config.settComb.useq and myHero:CanUseSpell(_Q) then
     if GetDistance(enemy.pos) > 525 then
       if(qlvl == 0) then
       elseif(qlvl == 1) then
-        if GetDistance(enemy.pos) < 600 and not jinxq then CastSpell(_Q)
-        elseif GetDistance(enemy.pos) > 600 and jinxq then CastSpell(_Q) end
+        if GetDistance(enemy.pos) < 600 and not jinxq then CastSpell(_Q) end
       elseif(qlvl == 2) then
-        if GetDistance(enemy.pos) < 625 and not jinxq then CastSpell(_Q)
-        elseif GetDistance(enemy.pos) > 625 and jinxq then CastSpell(_Q) end
+        if GetDistance(enemy.pos) < 625 and not jinxq then CastSpell(_Q) end
       elseif(qlvl == 3) then
-        if GetDistance(enemy.pos) < 650 and not jinxq then CastSpell(_Q)
-        elseif GetDistance(enemy.pos) > 650 and jinxq then CastSpell(_Q) end
+        if GetDistance(enemy.pos) < 650 and not jinxq then CastSpell(_Q) end
       elseif(qlvl == 4) then
-        if GetDistance(enemy.pos) < 675 and not jinxq then CastSpell(_Q)
-        elseif GetDistance(enemy.pos) > 675 and jinxq then CastSpell(_Q) end
+        if GetDistance(enemy.pos) < 675 and not jinxq then CastSpell(_Q) end
       elseif(qlvl == 5) then
-        if GetDistance(enemy.pos) < 700 and not jinxq then CastSpell(_Q)
-        elseif GetDistance(enemy.pos) > 700 and jinxq then CastSpell(_Q) end
+        if GetDistance(enemy.pos) < 700 and not jinxq then CastSpell(_Q) end
       end
     elseif GetDistance(enemy.pos) < 525 then
       if jinxq then CastSpell(_Q) end
     end
   end
+
 
   if Config.settHar.usew and myHero:CanUseSpell(_W)then
     if Config.settHar.usewaa then
@@ -365,20 +361,15 @@ function onCombo()
     if GetDistance(enemy.pos) > 525 then
       if(qlvl == 0) then
       elseif(qlvl == 1) then
-        if GetDistance(enemy.pos) < 600 and not jinxq then CastSpell(_Q)
-        elseif GetDistance(enemy.pos) > 600 and jinxq then CastSpell(_Q) end
+        if GetDistance(enemy.pos) < 600 and not jinxq then CastSpell(_Q) end
       elseif(qlvl == 2) then
-        if GetDistance(enemy.pos) < 625 and not jinxq then CastSpell(_Q)
-        elseif GetDistance(enemy.pos) > 625 and jinxq then CastSpell(_Q) end
+        if GetDistance(enemy.pos) < 625 and not jinxq then CastSpell(_Q) end
       elseif(qlvl == 3) then
-        if GetDistance(enemy.pos) < 650 and not jinxq then CastSpell(_Q)
-        elseif GetDistance(enemy.pos) > 650 and jinxq then CastSpell(_Q) end
+        if GetDistance(enemy.pos) < 650 and not jinxq then CastSpell(_Q) end
       elseif(qlvl == 4) then
-        if GetDistance(enemy.pos) < 675 and not jinxq then CastSpell(_Q)
-        elseif GetDistance(enemy.pos) > 675 and jinxq then CastSpell(_Q) end
+        if GetDistance(enemy.pos) < 675 and not jinxq then CastSpell(_Q) end
       elseif(qlvl == 5) then
-        if GetDistance(enemy.pos) < 700 and not jinxq then CastSpell(_Q)
-        elseif GetDistance(enemy.pos) > 700 and jinxq then CastSpell(_Q) end
+        if GetDistance(enemy.pos) < 700 and not jinxq then CastSpell(_Q) end
       end
     elseif GetDistance(enemy.pos) < 525 then
       if jinxq then CastSpell(_Q) end
