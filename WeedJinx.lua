@@ -7,7 +7,7 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.3
+local Version = 0.4
 local Heal, Barrier = nil
 
 if myHero.charName ~= "Jinx" then return end
