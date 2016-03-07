@@ -7,7 +7,7 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.903
+local Version = 0.904
 local Heal, Barrier = nil
 local OrbWalkers = {}
 local LoadedOrb = nil
@@ -77,8 +77,8 @@ function initMenu()
 
   Config:addSubMenu("Laneclear Settings", "settLC")
   Config.settLC:addParam("minigun", "Switch to Minigun on Laneclear", SCRIPT_PARAM_ONOFF, true)
-  Config.settLC:addParam("rocket", "Use Rocket Launcher", SCRIPT_PARAM_ONOFF, true)
-  Config.settLC:addParam("count", "X Minions to use Rocket Launcher", SCRIPT_PARAM_SLICE, 1, 1, 10, 0)
+  Config.settLC:addParam("rocket", "Use Rocket Launcher", SCRIPT_PARAM_ONOFF, false)
+  Config.settLC:addParam("count", "X Minions to use Rocket Launcher", SCRIPT_PARAM_SLICE, 3, 1, 10, 0)
 
   Config:addSubMenu("Lasthit Settings", "settLH")
   Config.settLH:addParam("minigun", "Switch to Minigun on Lasthit", SCRIPT_PARAM_ONOFF, true)
@@ -86,12 +86,12 @@ function initMenu()
   Config:addSubMenu("Killsteal Settings", "settSteal")
   Config.settSteal:addParam("usew", "Use W for Killsteal", SCRIPT_PARAM_ONOFF, true)
   Config.settSteal:addParam("user", "Use R for Killsteal", SCRIPT_PARAM_ONOFF, true)
-  Config.settSteal:addParam("range", "Max Range for R Steal", SCRIPT_PARAM_SLICE, 500, 0, 5000, 0)
+  Config.settSteal:addParam("range", "Max Range for R Steal", SCRIPT_PARAM_SLICE, 1500, 0, 5000, 0)
 
   Config:addSubMenu("Draw Settings", "settDraw")
-  Config.settDraw:addParam("qrange", "Draw Q Range", SCRIPT_PARAM_ONOFF, true)
-  Config.settDraw:addParam("wrange", "Draw W Range", SCRIPT_PARAM_ONOFF, true)
-  Config.settDraw:addParam("erange", "Draw E Range", SCRIPT_PARAM_ONOFF, true)
+  Config.settDraw:addParam("qrange", "Draw Q Range", SCRIPT_PARAM_ONOFF, false)
+  Config.settDraw:addParam("wrange", "Draw W Range", SCRIPT_PARAM_ONOFF, false)
+  Config.settDraw:addParam("erange", "Draw E Range", SCRIPT_PARAM_ONOFF, false)
 
   Config:addSubMenu("Auto Potion Settings", "settPot")
   Config.settPot:addParam("active", "Use Auto Potion", SCRIPT_PARAM_ONOFF, true)
@@ -228,7 +228,7 @@ function onLaneClear()
       if not minion.dead and minion.team ~= myHero.team then count = count+1 end
     end
 
-    if count > Config.settLC.count and not jinxq then CastSpell(_Q)
+    if count >= Config.settLC.count and not jinxq then CastSpell(_Q)
     elseif count < Config.settLC.count and jinxq then CastSpell(_Q) end
   end
 
@@ -306,9 +306,8 @@ function onHarass()
     end
   end
 
-
-  if Config.settHar.usew and myHero:CanUseSpell(_W)then
-    if Config.settHar.usewaa then
+  if Config.settComb.usew and myHero:CanUseSpell(_W) then
+    if Config.settComb.usewaa then
       if(qlvl == 0) then
         if GetDistance(enemy.pos) > 525 then
           local CastPosition = predict(enemy, "W")
@@ -346,6 +345,7 @@ function onHarass()
     end
   end
 
+
   if Config.settHar.usee and myHero:CanUseSpell(_E) then
     local CastPosition = predict(enemy, "E")
     if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
@@ -380,9 +380,13 @@ function onCombo()
     end
   end
 
-  if Config.settComb.usew and myHero:CanUseSpell(_W)then
+  if Config.settComb.usew and myHero:CanUseSpell(_W) then
     if Config.settComb.usewaa then
       if(qlvl == 0) then
+        if GetDistance(enemy.pos) > 525 then
+          local CastPosition = predict(enemy, "W")
+          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+        end
       elseif(qlvl == 1) then
         if GetDistance(enemy.pos) > 600 then
           local CastPosition = predict(enemy, "W")
@@ -461,12 +465,13 @@ end
 function predict(target, spell)
 
   if(spell == "W") then
-    local CastPosition, HitChance, Position = currentPred:GetLineCastPosition(target, 0.75, 50, 1440, 2000, myHero, true)
-    if CastPosition and HitChance >= Config.settHit.ehit and GetDistance(CastPosition) < 1440 then
+    local CastPosition, HitChance, Position = currentPred:GetLineCastPosition(target, 0.60, 40, 1450, math.huge, myHero, true)
+    if CastPosition and HitChance >= Config.settHit.whit and GetDistance(CastPosition) < 1440 then
       return CastPosition
     end
   elseif(spell == "E") then
-    local CastPosition, HitChance, Position = currentPred:GetLineCastPosition(target, 0.35, 50  , 900, 1500, myHero, false)
+    prntChat("CastW")
+    local CastPosition, HitChance, Position = currentPred:GetLineCastPosition(target, 0.35, 50, 900, 1500, myHero, false)
     if CastPosition and HitChance >= Config.settHit.ehit and GetDistance(CastPosition) < 890 then
       return CastPosition
     end
