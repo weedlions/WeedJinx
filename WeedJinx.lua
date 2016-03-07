@@ -7,8 +7,10 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.8
+local Version = 0.901
 local Heal, Barrier = nil
+local OrbWalkers = {}
+local LoadedOrb = nil
 
 if myHero.charName ~= "Jinx" then return end
 
@@ -17,26 +19,15 @@ function VPredLoader()
   if not (FileExist(LibPath)) then
     local Host = "raw.githubusercontent.com"
     local Path = "/SidaBoL/Scripts/master/Common/VPrediction.lua"
-    DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+    DownloadFile("https://"..Host..Path, LibPath, function () prntChat("VPrediction installed. Please press 2x F9") end)
     require "VPrediction"
+    currentPred = VPrediction()
   else
-    require "UOL"
+    require "VPrediction"
+    currentPred = VPrediction()
   end
 end
 AddLoadCallback(function() VPredLoader() end)
-
-function UOLLoader()
-  local LibPath = LIB_PATH.."UOL.lua"
-  if not (FileExist(LibPath)) then
-    local Host = "raw.githubusercontent.com"
-    local Path = "/nebelwolfi/BoL/master/Common/UOL.lua"
-    DownloadFile("https://"..Host..Path, LibPath, function ()  end)
-    require "UOL"
-  else
-    require "UOL"
-  end
-end
-AddLoadCallback(function() UOLLoader() end)
 
 function OnLoad()
 
@@ -52,8 +43,9 @@ function OnLoad()
 
   initMenu()
   initSumms()
-
   CheckUpdates()
+  InitOrbs()
+  LoadOrb()
 
 end
 
@@ -122,11 +114,6 @@ function initMenu()
   Config.settHit:addParam("Blank", "3 = Slowed Targets (~100%)", SCRIPT_PARAM_INFO, "")
   Config.settHit:addParam("Blank", "4 = Immobile Targets (~100%)", SCRIPT_PARAM_INFO, "")
 
-  Config:addSubMenu("Key Settings", "settKey")
-  Config.settKey:addParam("Blank", "Use Orbwalker Keys", SCRIPT_PARAM_INFO, "")
-
-  --UOL:AddToMenu(scriptConfig("OrbWalker", "OrbWalker"))
-
 end
 
 function OnTick()
@@ -137,13 +124,13 @@ function OnTick()
   ts2:update()
   minman:update()
 
-  if(UOL:GetOrbWalkMode() == "LaneClear") then onLaneClear() end
+  if(getMode() == "LaneClear") then onLaneClear() end
 
-  if(UOL:GetOrbWalkMode() == "LastHit") then onLastHit() end
+  if(getMode() == "LastHit") then onLastHit() end
 
-  if(UOL:GetOrbWalkMode() == "Combo") then onCombo() end
+  if(getMode() == "Combo") then onCombo() end
 
-  if(UOL:GetOrbWalkMode() == "Harass") then onHarass() end
+  if(getMode() == "Harass") then onHarass() end
 
   getQStatus()
   qlvl = myHero:GetSpellData(_Q).level
@@ -441,7 +428,20 @@ function onCombo()
 end
 
 function GetTarget()
-  if UOL:GetTarget() ~= nil and UOL:GetTarget().type == myHero.type then return UOL:GetTarget() end
+
+  if LoadedOrb == "Sac" and TIMETOSACLOAD then
+    return _G.AutoCarry.Crosshair:GetTarget()
+  elseif LoadedOrb == "Mma" then
+    return _G.MMA_GetTarget()
+  elseif LoadedOrb == "Pewalk" then
+    return _G._Pewalk.GetTarget()
+  elseif LoadedOrb == "Now" then
+    return _G.NOWi:GetTarget()
+  elseif self.LoadedOrb == "Sow" then
+    return _G.SOWi:GetTarget(true)
+  elseif self.LoadedOrb == "SxOrbWalk" then
+    return _G.SxOrb:GetTarget()
+  end
 
   ts:update()
   if ts2.target and not ts2.target.dead and ts2.target.type == myHero.type then
@@ -449,6 +449,7 @@ function GetTarget()
   else
     return nil
   end
+  
 end
 
 function GetWTarget()
@@ -560,14 +561,110 @@ function DownloadUpdate()
   end)
 end
 
-function DownloadVPred()
-  DownloadFile("https://raw.githubusercontent.com/SidaBoL/Scripts/master/Common/VPrediction.lua", LIB_PATH.."VPrediction"..".lua", function ()
-    prntChat("VPrediction Downloaded. Press 2x F9")
-  end)
+function InitOrbs()
+  if _G.Reborn_Loaded or _G.Reborn_Initialised or _G.AutoCarry ~= nil then
+    table.insert(OrbWalkers, "SAC")
+  end
+  if _G.MMA_IsLoaded then
+    table.insert(OrbWalkers, "MMA")
+  end
+  if _G._Pewalk then
+    table.insert(OrbWalkers, "Pewalk")
+  end
+  if FileExist(LIB_PATH .. "/Nebelwolfi's Orb Walker.lua") then
+    table.insert(OrbWalkers, "NOW")
+  end
+  if FileExist(LIB_PATH .. "/Big Fat Orbwalker.lua") then
+    table.insert(OrbWalkers, "Big Fat Walk")
+  end
+  if FileExist(LIB_PATH .. "/SOW.lua") then
+    table.insert(OrbWalkers, "SOW")
+  end
+  if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
+    table.insert(OrbWalkers, "SxOrbWalk")
+  end
+  if #OrbWalkers > 0 then
+    Config:addSubMenu("Orbwalkers", "Orbwalkers")
+    Config:addSubMenu("Keys", "Keys")
+    Config.Orbwalkers:addParam("Orbwalker", "OrbWalker", SCRIPT_PARAM_LIST, 1, OrbWalkers)
+    Config.Keys:addParam("info", "Detecting keys from: "..OrbWalkers[Config.Orbwalkers.Orbwalker], SCRIPT_PARAM_INFO, "")
+    local OrbAlr = false
+    Config.Orbwalkers:setCallback("Orbwalker", function(value)
+      if OrbAlr then return end
+      OrbAlr = true
+      Menu.Orbwalkers:addParam("info", "Press F9 2x to load your selected Orbwalker.", SCRIPT_PARAM_INFO, "")
+      prntChat("Press F9 2x to load your selected Orbwalker")
+    end)
+  end
 end
 
-function DownloadUOL()
-  DownloadFile("https://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/UOL.lua", LIB_PATH.."UOL"..".lua", function ()
-    prntChat("Unified Orbwalker Library Downloaded. Press 2x F9")
-  end)
+function LoadOrb()
+  if OrbWalkers[Config.Orbwalkers.Orbwalker] == "SAC" then
+    LoadedOrb = "Sac"
+    TIMETOSACLOAD = false
+    DelayAction(function() TIMETOSACLOAD = true end,15)
+  elseif OrbWalkers[Config.Orbwalkers.Orbwalker] == "MMA" then
+    LoadedOrb = "Mma"
+  elseif OrbWalkers[Config.Orbwalkers.Orbwalker] == "Pewalk" then
+    LoadedOrb = "Pewalk"
+  elseif OrbWalkers[Config.Orbwalkers.Orbwalker] == "NOW" then
+    LoadedOrb = "Now"
+    require "Nebelwolfi's Orb Walker"
+    _G.NOWi = NebelwolfisOrbWalkerClass()
+    Config.Orbwalkers:addSubMenu("NOW", "NOW")
+    _G.NebelwolfisOrbWalkerClass(Config.Orbwalkers.NOW)
+  elseif OrbWalkers[Config.Orbwalkers.Orbwalker] == "Big Fat Walk" then
+    LoadedOrb = "Big"
+    require "Big Fat Orbwalker"
+  elseif OrbWalkers[Config.Orbwalkers.Orbwalker] == "SOW" then
+    LoadedOrb = "Sow"
+    require "SOW"
+    Config.Orbwalkers:addSubMenu("SOW", "SOW")
+    _G.SOWi = SOW(_G.VP)
+    SOW:LoadToMenu(Config.Orbwalkers.SOW)
+  elseif OrbWalkers[Config.Orbwalkers.Orbwalker] == "SxOrbWalk" then
+    LoadedOrb = "SxOrbWalk"
+    require "SxOrbWalk"
+    Config.Orbwalkers:addSubMenu("SxOrbWalk", "SxOrbWalk")
+    SxOrb:LoadToMenu(Config.Orbwalkers.SxOrbWalk)
+  end
+end
+
+function getMode()
+  if LoadedOrb == "Sac" and TIMETOSACLOAD then
+    if _G.AutoCarry.Keys.AutoCarry then return "Combo" end
+    if _G.AutoCarry.Keys.MixedMode then return "Harass" end
+    if _G.AutoCarry.Keys.LaneClear then return "Laneclear" end
+    if _G.AutoCarry.Keys.LastHit then return "Lasthit" end
+  elseif LoadedOrb == "Mma" then
+    if _G.MMA_IsOrbwalking() then return "Combo" end
+    if _G.MMA_IsDualCarrying() then return "Harass" end
+    if _G.MMA_IsLaneClearing() then return "Laneclear" end
+    if _G.MMA_IsLastHitting() then return "Lasthit" end
+  elseif LoadedOrb == "Pewalk" then
+    if _G._Pewalk.GetActiveMode().Carry then return "Combo" end
+    if _G._Pewalk.GetActiveMode().Mixed then return "Harass" end
+    if _G._Pewalk.GetActiveMode().LaneClear then return "Laneclear" end
+    if _G._Pewalk.GetActiveMode().Farm then return "Lasthit" end
+  elseif LoadedOrb == "Now" then
+    if _G.NOWi.Config.k.Combo then return "Combo" end
+    if _G.NOWi.Config.k.Harass then return "Harass" end
+    if _G.NOWi.Config.k.LaneClear then return "Laneclear" end
+    if _G.NOWi.Config.k.LastHit then return "Lasthit" end
+  elseif LoadedOrb == "Big" then
+    if _G["BigFatOrb_Mode"] == "Combo" then return "Combo" end
+    if _G["BigFatOrb_Mode"] == "Harass" then return "Harass" end
+    if _G["BigFatOrb_Mode"] == "LaneClear" then return "Laneclear" end
+    if _G["BigFatOrb_Mode"] == "LastHit" then return "Lasthit" end
+  elseif LoadedOrb == "Sow" then
+    if _G.SOWi.Menu.Mode0 then return "Combo" end
+    if _G.SOWi.Menu.Mode1 then return "Harass" end
+    if _G.SOWi.Menu.Mode2 then return "Laneclear" end
+    if _G.SOWi.Menu.Mode3 then return "Lasthit" end
+  elseif LoadedOrb == "SxOrbWalk" then
+    if _G.SxOrb.isFight then return "Combo" end
+    if _G.SxOrb.isHarass then return "Harass" end
+    if _G.SxOrb.isLaneClear then return "Laneclear" end
+    if _G.SxOrb.isLastHit then return "Lasthit" end
+  end
 end
