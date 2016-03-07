@@ -38,8 +38,8 @@ function OnLoad()
     prntChat("Version "..Version.." loaded.")
   end
 
-  ts = TargetSelector(TARGET_LESS_CAST,1600)
-  ts2 = TargetSelector(TARGET_LESS_CAST,800)
+  ts = TargetSelector(TARGET_LESS_CAST,1450)
+  ts2 = TargetSelector(TARGET_LESS_CAST,525)
 
   initMenu()
   initSumms()
@@ -86,13 +86,14 @@ function initMenu()
   Config:addSubMenu("Killsteal Settings", "settSteal")
   Config.settSteal:addParam("usew", "Use W for Killsteal", SCRIPT_PARAM_ONOFF, true)
   Config.settSteal:addParam("user", "Use R for Killsteal", SCRIPT_PARAM_ONOFF, true)
-  Config.settSteal:addParam("minrange", "Max Range for R Steal", SCRIPT_PARAM_SLICE, 250, 0, 5000, 0)
+  Config.settSteal:addParam("minrange", "Min Range for R Steal", SCRIPT_PARAM_SLICE, 500, 0, 5000, 0)
   Config.settSteal:addParam("range", "Max Range for R Steal", SCRIPT_PARAM_SLICE, 1500, 0, 5000, 0)
 
   Config:addSubMenu("Draw Settings", "settDraw")
   Config.settDraw:addParam("qrange", "Draw Q Range", SCRIPT_PARAM_ONOFF, false)
   Config.settDraw:addParam("wrange", "Draw W Range", SCRIPT_PARAM_ONOFF, false)
   Config.settDraw:addParam("erange", "Draw E Range", SCRIPT_PARAM_ONOFF, false)
+  Config.settDraw:addParam("wayp", "Draw Waypoints", SCRIPT_PARAM_ONOFF, true)
 
   Config:addSubMenu("Auto Potion Settings", "settPot")
   Config.settPot:addParam("active", "Use Auto Potion", SCRIPT_PARAM_ONOFF, true)
@@ -104,11 +105,13 @@ function initMenu()
 
   Config:addSubMenu("HitChance Settings", "settHit")
   Config.settHit:addParam("Blank", "HitChance for E", SCRIPT_PARAM_INFO, "")
-  Config.settHit:addParam("whit", "Recommended = 2", SCRIPT_PARAM_SLICE, 2, 2, 4, 0)
+  Config.settHit:addParam("whit", "HitChance: Recommended = 2", SCRIPT_PARAM_SLICE, 2, 2, 4, 0)
   Config.settHit:addParam("Blank", "HitChance for E", SCRIPT_PARAM_INFO, "")
-  Config.settHit:addParam("ehit", "Recommended = 4", SCRIPT_PARAM_SLICE, 4, 2, 4, 0)
+  Config.settHit:addParam("ehit", "HitChance: Recommended = 4", SCRIPT_PARAM_SLICE, 4, 2, 4, 0)
+  Config.settHit:addParam("x", "HitChance when under X % HP", SCRIPT_PARAM_SLICE, 25, 0, 100, 0)
+  Config.settHit:addParam("ehitx", "HitChance: Recommended = 2", SCRIPT_PARAM_SLICE, 2, 2, 4, 0)
   Config.settHit:addParam("Blank", "HitChance for R", SCRIPT_PARAM_INFO, "")
-  Config.settHit:addParam("rhit", "Recommended = 2", SCRIPT_PARAM_SLICE, 2, 2, 4, 0)
+  Config.settHit:addParam("rhit", "HitChance: Recommended = 2", SCRIPT_PARAM_SLICE, 2, 2, 4, 0)
   Config.settHit:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
   Config.settHit:addParam("Blank", "Explanation", SCRIPT_PARAM_INFO, "")
   Config.settHit:addParam("Blank", "2 = High Hitchance", SCRIPT_PARAM_INFO, "")
@@ -167,7 +170,7 @@ function onKillSteal()
     for i=1, heroManager.iCount do
       local enemy = heroManager:getHero(i)
 
-      if enemy.team ~= myHero.team and not enemy.dead and myHero:CanUseSpell(_W) == READY and enemy.health < (getDmg("W", enemy, myHero) - 10) and enemy.bTargetable then
+      if enemy.team ~= myHero.team and not enemy.dead and enemy.visible and myHero:CanUseSpell(_W) == READY and enemy.health < (getDmg("W", enemy, myHero) - 10) and enemy.bTargetable then
         local CastPosition = predict(enemy, "W")
         if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
       end
@@ -177,7 +180,7 @@ function onKillSteal()
   if Config.settSteal.user then
     for i=1, heroManager.iCount do
       local enemy = heroManager:getHero(i)
-      if enemy.team ~= myHero.team and not enemy.dead and myHero:CanUseSpell(_R) == READY and enemy.health < (getDmg("R", enemy, myHero) - 10) and enemy.bTargetable then
+      if enemy.team ~= myHero.team and not enemy.dead and enemy.visible and myHero:CanUseSpell(_R) == READY and enemy.health < (getDmg("R", enemy, myHero) - 10) and enemy.bTargetable then
         local CastPosition = predict(enemy, "R")
         if(CastPosition ~= nil) then CastSpell(_R, CastPosition.x, CastPosition.z) end
       end
@@ -283,8 +286,9 @@ end
 function onHarass()
 
   local enemy = GetTarget()
+  local wenemy = GetWTarget()
 
-  if enemy == nil then return end
+  if enemy == nil and wenemy == nil then return end
 
   if enemy.team == myHero.team and not enemy.bTargetable and not enemy.visible and enemy.dead then return end
 
@@ -307,49 +311,53 @@ function onHarass()
     end
   end
 
-  if Config.settComb.usew and myHero:CanUseSpell(_W) then
-    if Config.settComb.usewaa then
+  if Config.settHar.usew and myHero:CanUseSpell(_W) then
+    if Config.settHar.usewaa then
       if(qlvl == 0) then
-        if GetDistance(enemy.pos) > 525 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 525 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       elseif(qlvl == 1) then
-        if GetDistance(enemy.pos) > 600 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 600 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       elseif(qlvl == 2) then
-        if GetDistance(enemy.pos) > 625 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 625 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       elseif(qlvl == 3) then
-        if GetDistance(enemy.pos) > 650 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 650 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       elseif(qlvl == 4) then
-        if GetDistance(enemy.pos) > 675 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 675 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       elseif(qlvl == 5) then
-        if GetDistance(enemy.pos) > 700 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 700 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       end
     else
-      local CastPosition = predict(enemy, "W")
+      local CastPosition = predict(wenemy, "W")
       if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
     end
   end
 
-
   if Config.settHar.usee and myHero:CanUseSpell(_E) then
-    local CastPosition = predict(enemy, "E")
-    if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+    if ((myHero.health/myHero.maxHealth)*100) > Config.settHit.x then
+      local CastPosition = predict(enemy, "E")
+      if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+    else
+      local CastPosition = predict(enemy, "EX")
+      if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+    end
   end
 
 end
@@ -357,8 +365,9 @@ end
 function onCombo()
 
   local enemy = GetTarget()
+  local wenemy = GetWTarget()
 
-  if enemy == nil then return end
+  if enemy == nil and wenemy == nil then return end
 
   if enemy.team == myHero.team and not enemy.bTargetable and not enemy.visible and enemy.dead then return end
 
@@ -384,45 +393,50 @@ function onCombo()
   if Config.settComb.usew and myHero:CanUseSpell(_W) then
     if Config.settComb.usewaa then
       if(qlvl == 0) then
-        if GetDistance(enemy.pos) > 525 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 525 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       elseif(qlvl == 1) then
-        if GetDistance(enemy.pos) > 600 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 600 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       elseif(qlvl == 2) then
-        if GetDistance(enemy.pos) > 625 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 625 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       elseif(qlvl == 3) then
-        if GetDistance(enemy.pos) > 650 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 650 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       elseif(qlvl == 4) then
-        if GetDistance(enemy.pos) > 675 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 675 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       elseif(qlvl == 5) then
-        if GetDistance(enemy.pos) > 700 then
-          local CastPosition = predict(enemy, "W")
+        if GetDistance(wenemy.pos) > 700 then
+          local CastPosition = predict(wenemy, "W")
           if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
         end
       end
     else
-      local CastPosition = predict(enemy, "W")
+      local CastPosition = predict(wenemy, "W")
       if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
     end
   end
 
   if Config.settComb.usee and myHero:CanUseSpell(_E) then
-    local CastPosition = predict(enemy, "E")
-    if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+    if ((myHero.health/myHero.maxHealth)*100) > Config.settHit.x then
+      local CastPosition = predict(enemy, "E")
+      if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+    else
+      local CastPosition = predict(enemy, "EX")
+      if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+    end
   end
 
 end
@@ -443,7 +457,7 @@ function GetTarget()
     return _G.SxOrb:GetTarget()
   end
 
-  ts:update()
+  ts2:update()
   if ts2.target and not ts2.target.dead and ts2.target.type == myHero.type then
     return ts2.target
   else
@@ -453,7 +467,6 @@ function GetTarget()
 end
 
 function GetWTarget()
-  if UOL:GetTarget() ~= nil and UOL:GetTarget().type == myHero.type then return UOL:GetTarget() end
 
   ts:update()
   if ts.target and not ts.target.dead and ts.target.type == myHero.type then
@@ -461,6 +474,7 @@ function GetWTarget()
   else
     return nil
   end
+  
 end
 
 function predict(target, spell)
@@ -473,6 +487,11 @@ function predict(target, spell)
   elseif(spell == "E") then
     local CastPosition, HitChance, Position = currentPred:GetLineCastPosition(target, 0.35, 50, 900, 1500, myHero, false)
     if CastPosition and HitChance >= Config.settHit.ehit and GetDistance(CastPosition) < 890 then
+      return CastPosition
+    end
+  elseif(spell == "EX") then
+    local CastPosition, HitChance, Position = currentPred:GetLineCastPosition(target, 0.35, 50, 900, 1500, myHero, false)
+    if CastPosition and HitChance >= Config.settHit.ehitx and GetDistance(CastPosition) < 890 then
       return CastPosition
     end
   elseif(spell == "R") then
@@ -520,13 +539,13 @@ function OnDraw()
     DrawCircle(myHero.x, myHero.y, myHero.z, 900, 0x111111)
   end
 
-  DrawTextA(qlvl,12,20,20*1+20)
+  if Config.settDraw.wayp then
+    for i=1, heroManager.iCount do
+      local enemy = heroManager:getHero(i)
 
-  for i=1, heroManager.iCount do
-    local enemy = heroManager:getHero(i)
-    
-    if enemy.team ~= myHero.team and not enemy.dead then
-      currentPred:DrawSavedWaypoints(enemy, 1) 
+      if enemy.team ~= myHero.team and not enemy.dead then
+        currentPred:DrawSavedWaypoints(enemy, 1)
+      end
     end
   end
 
