@@ -7,7 +7,7 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.904
+local Version = 0.905
 local Heal, Barrier = nil
 local OrbWalkers = {}
 local LoadedOrb = nil
@@ -86,6 +86,7 @@ function initMenu()
   Config:addSubMenu("Killsteal Settings", "settSteal")
   Config.settSteal:addParam("usew", "Use W for Killsteal", SCRIPT_PARAM_ONOFF, true)
   Config.settSteal:addParam("user", "Use R for Killsteal", SCRIPT_PARAM_ONOFF, true)
+  Config.settSteal:addParam("minrange", "Max Range for R Steal", SCRIPT_PARAM_SLICE, 250, 0, 5000, 0)
   Config.settSteal:addParam("range", "Max Range for R Steal", SCRIPT_PARAM_SLICE, 1500, 0, 5000, 0)
 
   Config:addSubMenu("Draw Settings", "settDraw")
@@ -470,14 +471,13 @@ function predict(target, spell)
       return CastPosition
     end
   elseif(spell == "E") then
-    prntChat("CastW")
     local CastPosition, HitChance, Position = currentPred:GetLineCastPosition(target, 0.35, 50, 900, 1500, myHero, false)
     if CastPosition and HitChance >= Config.settHit.ehit and GetDistance(CastPosition) < 890 then
       return CastPosition
     end
   elseif(spell == "R") then
     local CastPosition, HitChance, Position = currentPred:GetLineCastPosition(target, 0.55, 150, math.huge, 1500, myHero, true)
-    if CastPosition and HitChance >= Config.settHit.rhit and GetDistance(CastPosition) < Config.settSteal.range then
+    if CastPosition and HitChance >= Config.settHit.rhit and GetDistance(CastPosition) < Config.settSteal.range and GetDistance(CastPosition) > Config.settSteal.minrange then
       return CastPosition
     end
   else return nil
@@ -521,6 +521,14 @@ function OnDraw()
   end
 
   DrawTextA(qlvl,12,20,20*1+20)
+
+  for i=1, heroManager.iCount do
+    local enemy = heroManager:getHero(i)
+    
+    if enemy.team ~= myHero.team and not enemy.dead then
+      currentPred:DrawSavedWaypoints(enemy, 1) 
+    end
+  end
 
 end
 
