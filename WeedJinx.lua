@@ -7,7 +7,7 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.906
+local Version = 0.907
 local Heal, Barrier = nil
 local OrbWalkers = {}
 local LoadedOrb = nil
@@ -291,6 +291,7 @@ function onHarass()
   if enemy == nil and wenemy == nil then return end
 
   if enemy.team == myHero.team and not enemy.bTargetable and not enemy.visible and enemy.dead then return end
+  if wenemy.team == myHero.team and not wenemy.bTargetable and not wenemy.visible and wenemy.dead then return end
 
   if Config.settComb.useq and myHero:CanUseSpell(_Q) then
     if GetDistance(enemy.pos) > 525 then
@@ -370,6 +371,7 @@ function onCombo()
   if enemy == nil and wenemy == nil then return end
 
   if enemy.team == myHero.team and not enemy.bTargetable and not enemy.visible and enemy.dead then return end
+  if wenemy.team == myHero.team and not wenemy.bTargetable and not wenemy.visible and wenemy.dead then return end
 
   if Config.settComb.useq and myHero:CanUseSpell(_Q) then
     if GetDistance(enemy.pos) > 525 then
