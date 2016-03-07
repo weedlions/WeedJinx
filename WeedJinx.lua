@@ -7,17 +7,17 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.6
+local Version = 0.7
 local Heal, Barrier = nil
 
-  if myHero.charName ~= "Jinx" then return end
+if myHero.charName ~= "Jinx" then return end
 
 function VPredLoader()
   local LibPath = LIB_PATH.."VPrediction.lua"
   if not (FileExist(LibPath)) then
-      local Host = "raw.githubusercontent.com"
-      local Path = "/SidaBoL/Scripts/master/Common/VPrediction.lua"
-      DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+    local Host = "raw.githubusercontent.com"
+    local Path = "/SidaBoL/Scripts/master/Common/VPrediction.lua"
+    DownloadFile("https://"..Host..Path, LibPath, function ()  end)
     require "VPrediction"
   end
 end
@@ -26,9 +26,9 @@ AddLoadCallback(function() VPredLoader() end)
 function UOLLoader()
   local LibPath = LIB_PATH.."UOL.lua"
   if not (FileExist(LibPath)) then
-      local Host = "raw.githubusercontent.com"
-      local Path = "/SidaBoL/Scripts/master/Common/VPrediction.lua"
-      DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+    local Host = "raw.githubusercontent.com"
+    local Path = "/nebelwolfi/BoL/master/Common/UOL.lua"
+    DownloadFile("https://"..Host..Path, LibPath, function ()  end)
     require "UOL"
   end
 end
