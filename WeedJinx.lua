@@ -1,4 +1,3 @@
-require "UOL"
 local ts, ts2
 local minman
 local jinxq, jinxqtrue = false -- 0 = MG, 1 = RL
@@ -12,7 +11,11 @@ local Version = 0.3
 local Heal, Barrier = nil
 
 if myHero.charName ~= "Jinx" then return end
-if not FileExist(LIB_PATH .. "/VPrediction.lua") then PrintChat("<font color=\"0B6121\"><b>--Weed Jinx--</b></font> ".."<font color=\"#FFFFFF\"><b>Missing lib: VPrediction.</b></font>") return end
+if not FileExist(SCRIPT_PATH.."VPrediction.lua") then prntChat("VPrediction not installed, installing now.") DownloadVPred()
+else require "VPrediction" currentPred = VPrediction() end
+
+if not FileExist(SCRIPT_PATH.."UOL.lua") then prntChat("Unified Orbwalker Library not installed, installing now.") DownloadUOL()
+else require "UOL" end
 
 function OnLoad()
 
@@ -28,9 +31,6 @@ function OnLoad()
 
   initMenu()
   initSumms()
-
-  require "VPrediction"
-  currentPred = VPrediction()
 
   CheckUpdates()
 
@@ -535,6 +535,18 @@ end
 
 function DownloadUpdate()
   DownloadFile(adressfull, SCRIPT_PATH..scriptname..".lua", function ()
-    prntChat("Updated, press 2x F9")
+    prntChat("Updated, press 2x F9")  
+  end)
+end
+
+function DownloadVPred()
+  DownloadFile("https://raw.githubusercontent.com/SidaBoL/Scripts/master/Common/VPrediction.lua", LIB_PATH.."VPrediction"..".lua", function ()
+    prntChat("VPrediction Downloaded. Press 2x F9")
+  end)  
+end
+
+function DownloadUOL()
+  DownloadFile("https://raw.githubusercontent.com/nebelwolfi/BoL/master/Common/UOL.lua", LIB_PATH.."UOL"..".lua", function ()
+    prntChat("Unified Orbwalker Library Downloaded. Press 2x F9")
   end)
 end
