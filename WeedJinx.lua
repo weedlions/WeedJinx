@@ -7,15 +7,32 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.4
+local Version = 0.6
 local Heal, Barrier = nil
 
-if myHero.charName ~= "Jinx" then return end
-if not FileExist(LIB_PATH.."VPrediction.lua") then prntChat("VPrediction not installed, installing now.") DownloadVPred()
-else require "VPrediction" currentPred = VPrediction() end
+  if myHero.charName ~= "Jinx" then return end
 
-if not FileExist(LIB_PATH.."UOL.lua") then prntChat("Unified Orbwalker Library not installed, installing now.") DownloadUOL()
-else require "UOL" end
+function VPredLoader()
+  local LibPath = LIB_PATH.."VPrediction.lua"
+  if not (FileExist(LibPath)) then
+      local Host = "raw.githubusercontent.com"
+      local Path = "/SidaBoL/Scripts/master/Common/VPrediction.lua"
+      DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+    require "VPrediction"
+  end
+end
+AddLoadCallback(function() VPredLoader() end)
+
+function UOLLoader()
+  local LibPath = LIB_PATH.."UOL.lua"
+  if not (FileExist(LibPath)) then
+      local Host = "raw.githubusercontent.com"
+      local Path = "/SidaBoL/Scripts/master/Common/VPrediction.lua"
+      DownloadFile("https://"..Host..Path, LibPath, function ()  end)
+    require "UOL"
+  end
+end
+AddLoadCallback(function() UOLLoader() end)
 
 function OnLoad()
 
@@ -497,7 +514,7 @@ function OnDraw()
   if(Config.settDraw.erange) then
     DrawCircle(myHero.x, myHero.y, myHero.z, 900, 0x111111)
   end
-  
+
   DrawTextA(qlvl,12,20,20*1+20)
 
 end
@@ -535,14 +552,14 @@ end
 
 function DownloadUpdate()
   DownloadFile(adressfull, SCRIPT_PATH..scriptname..".lua", function ()
-    prntChat("Updated, press 2x F9")  
+    prntChat("Updated, press 2x F9")
   end)
 end
 
 function DownloadVPred()
   DownloadFile("https://raw.githubusercontent.com/SidaBoL/Scripts/master/Common/VPrediction.lua", LIB_PATH.."VPrediction"..".lua", function ()
     prntChat("VPrediction Downloaded. Press 2x F9")
-  end)  
+  end)
 end
 
 function DownloadUOL()
