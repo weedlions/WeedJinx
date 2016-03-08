@@ -461,9 +461,9 @@ function GetTarget()
     return _G._Pewalk.GetTarget()
   elseif LoadedOrb == "Now" then
     return _G.NOWi:GetTarget()
-  elseif self.LoadedOrb == "Sow" then
+  elseif LoadedOrb == "Sow" then
     return _G.SOWi:GetTarget(true)
-  elseif self.LoadedOrb == "SxOrbWalk" then
+  elseif LoadedOrb == "SxOrbWalk" then
     return _G.SxOrb:GetTarget()
   end
 
