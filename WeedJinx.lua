@@ -7,10 +7,11 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.908
+local Version = 0.909
 local Heal, Barrier = nil
 local OrbWalkers = {}
 local LoadedOrb = nil
+local targets, wtargets
 
 if myHero.charName ~= "Jinx" then return end
 
@@ -288,7 +289,8 @@ function onHarass()
   local enemy = GetTarget()
   local wenemy = GetWTarget()
 
-  if enemy == nil and wenemy == nil then return end
+  if enemy == nil then return end
+  if wenemy == nil then return end
 
   if not enemy.bTargetable and not enemy.visible then return end
   if not wenemy.bTargetable and not wenemy.visible then return end
@@ -372,7 +374,8 @@ function onCombo()
   local enemy = GetTarget()
   local wenemy = GetWTarget()
 
-  if enemy == nil and wenemy == nil then return end
+  if enemy == nil then return end
+  if wenemy == nil then return end
 
   if not enemy.bTargetable and not enemy.visible then return end
   if not wenemy.bTargetable and not wenemy.visible then return end
