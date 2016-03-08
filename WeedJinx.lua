@@ -7,7 +7,7 @@ local currentPred = nil
 local qlvl = 0
 local q0,q1,q2,q3,q4,q5 = false
 local healactive = false
-local Version = 0.907
+local Version = 0.908
 local Heal, Barrier = nil
 local OrbWalkers = {}
 local LoadedOrb = nil
@@ -290,74 +290,78 @@ function onHarass()
 
   if enemy == nil and wenemy == nil then return end
 
-  if enemy.team == myHero.team and not enemy.bTargetable and not enemy.visible and enemy.dead then return end
-  if wenemy.team == myHero.team and not wenemy.bTargetable and not wenemy.visible and wenemy.dead then return end
+  if not enemy.bTargetable and not enemy.visible then return end
+  if not wenemy.bTargetable and not wenemy.visible then return end
 
-  if Config.settComb.useq and myHero:CanUseSpell(_Q) then
-    if GetDistance(enemy.pos) > 525 then
-      if(qlvl == 0) then
-      elseif(qlvl == 1) then
-        if GetDistance(enemy.pos) < 600 and not jinxq then CastSpell(_Q) end
-      elseif(qlvl == 2) then
-        if GetDistance(enemy.pos) < 625 and not jinxq then CastSpell(_Q) end
-      elseif(qlvl == 3) then
-        if GetDistance(enemy.pos) < 650 and not jinxq then CastSpell(_Q) end
-      elseif(qlvl == 4) then
-        if GetDistance(enemy.pos) < 675 and not jinxq then CastSpell(_Q) end
-      elseif(qlvl == 5) then
-        if GetDistance(enemy.pos) < 700 and not jinxq then CastSpell(_Q) end
+  if enemy ~= nil then
+    if Config.settComb.useq and myHero:CanUseSpell(_Q) then
+      if GetDistance(enemy.pos) > 525 then
+        if(qlvl == 0) then
+        elseif(qlvl == 1) then
+          if GetDistance(enemy.pos) < 600 and not jinxq then CastSpell(_Q) end
+        elseif(qlvl == 2) then
+          if GetDistance(enemy.pos) < 625 and not jinxq then CastSpell(_Q) end
+        elseif(qlvl == 3) then
+          if GetDistance(enemy.pos) < 650 and not jinxq then CastSpell(_Q) end
+        elseif(qlvl == 4) then
+          if GetDistance(enemy.pos) < 675 and not jinxq then CastSpell(_Q) end
+        elseif(qlvl == 5) then
+          if GetDistance(enemy.pos) < 700 and not jinxq then CastSpell(_Q) end
+        end
+      elseif GetDistance(enemy.pos) < 525 then
+        if jinxq then CastSpell(_Q) end
       end
-    elseif GetDistance(enemy.pos) < 525 then
-      if jinxq then CastSpell(_Q) end
     end
   end
 
-  if Config.settHar.usew and myHero:CanUseSpell(_W) then
-    if Config.settHar.usewaa then
-      if(qlvl == 0) then
-        if GetDistance(wenemy.pos) > 525 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+  if wenemy ~= nil then
+    if Config.settHar.usew and myHero:CanUseSpell(_W) then
+      if Config.settHar.usewaa then
+        if(qlvl == 0) then
+          if GetDistance(wenemy.pos) > 525 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
+        elseif(qlvl == 1) then
+          if GetDistance(wenemy.pos) > 600 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
+        elseif(qlvl == 2) then
+          if GetDistance(wenemy.pos) > 625 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
+        elseif(qlvl == 3) then
+          if GetDistance(wenemy.pos) > 650 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
+        elseif(qlvl == 4) then
+          if GetDistance(wenemy.pos) > 675 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
+        elseif(qlvl == 5) then
+          if GetDistance(wenemy.pos) > 700 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
         end
-      elseif(qlvl == 1) then
-        if GetDistance(wenemy.pos) > 600 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
-        end
-      elseif(qlvl == 2) then
-        if GetDistance(wenemy.pos) > 625 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
-        end
-      elseif(qlvl == 3) then
-        if GetDistance(wenemy.pos) > 650 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
-        end
-      elseif(qlvl == 4) then
-        if GetDistance(wenemy.pos) > 675 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
-        end
-      elseif(qlvl == 5) then
-        if GetDistance(wenemy.pos) > 700 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
-        end
+      else
+        local CastPosition = predict(wenemy, "W")
+        if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
       end
-    else
-      local CastPosition = predict(wenemy, "W")
-      if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
     end
-  end
 
-  if Config.settHar.usee and myHero:CanUseSpell(_E) then
-    if ((myHero.health/myHero.maxHealth)*100) > Config.settHit.x then
-      local CastPosition = predict(enemy, "E")
-      if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
-    else
-      local CastPosition = predict(enemy, "EX")
-      if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+    if Config.settHar.usee and myHero:CanUseSpell(_E) then
+      if ((myHero.health/myHero.maxHealth)*100) > Config.settHit.x then
+        local CastPosition = predict(enemy, "E")
+        if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+      else
+        local CastPosition = predict(enemy, "EX")
+        if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+      end
     end
   end
 
@@ -370,74 +374,78 @@ function onCombo()
 
   if enemy == nil and wenemy == nil then return end
 
-  if enemy.team == myHero.team and not enemy.bTargetable and not enemy.visible and enemy.dead then return end
-  if wenemy.team == myHero.team and not wenemy.bTargetable and not wenemy.visible and wenemy.dead then return end
+  if not enemy.bTargetable and not enemy.visible then return end
+  if not wenemy.bTargetable and not wenemy.visible then return end
 
-  if Config.settComb.useq and myHero:CanUseSpell(_Q) then
-    if GetDistance(enemy.pos) > 525 then
-      if(qlvl == 0) then
-      elseif(qlvl == 1) then
-        if GetDistance(enemy.pos) < 600 and not jinxq then CastSpell(_Q) end
-      elseif(qlvl == 2) then
-        if GetDistance(enemy.pos) < 625 and not jinxq then CastSpell(_Q) end
-      elseif(qlvl == 3) then
-        if GetDistance(enemy.pos) < 650 and not jinxq then CastSpell(_Q) end
-      elseif(qlvl == 4) then
-        if GetDistance(enemy.pos) < 675 and not jinxq then CastSpell(_Q) end
-      elseif(qlvl == 5) then
-        if GetDistance(enemy.pos) < 700 and not jinxq then CastSpell(_Q) end
+  if enemy ~= nil then
+    if Config.settComb.useq and myHero:CanUseSpell(_Q) then
+      if GetDistance(enemy.pos) > 525 then
+        if(qlvl == 0) then
+        elseif(qlvl == 1) then
+          if GetDistance(enemy.pos) < 600 and not jinxq then CastSpell(_Q) end
+        elseif(qlvl == 2) then
+          if GetDistance(enemy.pos) < 625 and not jinxq then CastSpell(_Q) end
+        elseif(qlvl == 3) then
+          if GetDistance(enemy.pos) < 650 and not jinxq then CastSpell(_Q) end
+        elseif(qlvl == 4) then
+          if GetDistance(enemy.pos) < 675 and not jinxq then CastSpell(_Q) end
+        elseif(qlvl == 5) then
+          if GetDistance(enemy.pos) < 700 and not jinxq then CastSpell(_Q) end
+        end
+      elseif GetDistance(enemy.pos) < 525 then
+        if jinxq then CastSpell(_Q) end
       end
-    elseif GetDistance(enemy.pos) < 525 then
-      if jinxq then CastSpell(_Q) end
     end
   end
 
-  if Config.settComb.usew and myHero:CanUseSpell(_W) then
-    if Config.settComb.usewaa then
-      if(qlvl == 0) then
-        if GetDistance(wenemy.pos) > 525 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+  if wenemy ~= nil then
+    if Config.settComb.usew and myHero:CanUseSpell(_W) then
+      if Config.settComb.usewaa then
+        if(qlvl == 0) then
+          if GetDistance(wenemy.pos) > 525 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
+        elseif(qlvl == 1) then
+          if GetDistance(wenemy.pos) > 600 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
+        elseif(qlvl == 2) then
+          if GetDistance(wenemy.pos) > 625 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
+        elseif(qlvl == 3) then
+          if GetDistance(wenemy.pos) > 650 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
+        elseif(qlvl == 4) then
+          if GetDistance(wenemy.pos) > 675 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
+        elseif(qlvl == 5) then
+          if GetDistance(wenemy.pos) > 700 then
+            local CastPosition = predict(wenemy, "W")
+            if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
+          end
         end
-      elseif(qlvl == 1) then
-        if GetDistance(wenemy.pos) > 600 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
-        end
-      elseif(qlvl == 2) then
-        if GetDistance(wenemy.pos) > 625 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
-        end
-      elseif(qlvl == 3) then
-        if GetDistance(wenemy.pos) > 650 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
-        end
-      elseif(qlvl == 4) then
-        if GetDistance(wenemy.pos) > 675 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
-        end
-      elseif(qlvl == 5) then
-        if GetDistance(wenemy.pos) > 700 then
-          local CastPosition = predict(wenemy, "W")
-          if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
-        end
+      else
+        local CastPosition = predict(wenemy, "W")
+        if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
       end
-    else
-      local CastPosition = predict(wenemy, "W")
-      if(CastPosition ~= nil) then CastSpell(_W, CastPosition.x, CastPosition.z) end
     end
-  end
 
-  if Config.settComb.usee and myHero:CanUseSpell(_E) then
-    if ((myHero.health/myHero.maxHealth)*100) > Config.settHit.x then
-      local CastPosition = predict(enemy, "E")
-      if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
-    else
-      local CastPosition = predict(enemy, "EX")
-      if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+    if Config.settComb.usee and myHero:CanUseSpell(_E) then
+      if ((myHero.health/myHero.maxHealth)*100) > Config.settHit.x then
+        local CastPosition = predict(enemy, "E")
+        if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+      else
+        local CastPosition = predict(enemy, "EX")
+        if(CastPosition ~= nil) then CastSpell(_E, CastPosition.x, CastPosition.z) end
+      end
     end
   end
 
@@ -460,23 +468,15 @@ function GetTarget()
   end
 
   ts2:update()
-  if ts2.target and not ts2.target.dead and ts2.target.type == myHero.type then
-    return ts2.target
-  else
-    return nil
-  end
+  return ts2.target
 
 end
 
 function GetWTarget()
 
   ts:update()
-  if ts.target and not ts.target.dead and ts.target.type == myHero.type then
-    return ts.target
-  else
-    return nil
-  end
-  
+  return ts.target
+
 end
 
 function predict(target, spell)
