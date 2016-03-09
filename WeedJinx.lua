@@ -105,7 +105,7 @@ function initMenu()
   Config.settAHeal:addParam("hp", "Use on X % HP", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
 
   Config:addSubMenu("HitChance Settings", "settHit")
-  Config.settHit:addParam("Blank", "HitChance for E", SCRIPT_PARAM_INFO, "")
+  Config.settHit:addParam("Blank", "HitChance for W", SCRIPT_PARAM_INFO, "")
   Config.settHit:addParam("whit", "HitChance: Recommended = 2", SCRIPT_PARAM_SLICE, 2, 2, 4, 0)
   Config.settHit:addParam("Blank", "HitChance for E", SCRIPT_PARAM_INFO, "")
   Config.settHit:addParam("ehit", "HitChance: Recommended = 4", SCRIPT_PARAM_SLICE, 4, 2, 4, 0)
